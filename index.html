@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mini Projects & Games Hub</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --accent: #38bdf8;
+      --accent-hover: #0284c7;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+
+    p.subtitle {
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    .container {
+      background: var(--card);
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      width: 100%;
+      max-width: 450px;
+      text-align: center;
+      border: 1px solid #334155;
+    }
+
+    .status-badge {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 1.5rem;
+      min-height: 1.8rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      max-width: 300px;
+      margin: 0 auto 1.5rem auto;
+    }
+
+    .cell {
+      aspect-ratio: 1;
+      background: #0f172a;
+      border: 2px solid #334155;
+      border-radius: 0.5rem;
+      font-size: 2.5rem;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+      user-select: none;
+    }
+
+    .cell:hover {
+      background: #1e293b;
+      border-color: var(--accent);
+    }
+
+    .cell.x {
+      color: #38bdf8;
+    }
+
+    .cell.o {
+      color: #f43f5e;
+    }
+
+    .btn-reset {
+      background: var(--accent);
+      color: #0f172a;
+      border: none;
+      padding: 0.75rem 1.8rem;
+      font-size: 1rem;
+      font-weight: bold;
+      border-radius: 2rem;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .btn-reset:hover {
+      background: #7dd3fc;
+      transform: scale(1.03);
+    }
+
+    .btn-reset:active {
+      transform: scale(0.98);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Mini Games Showcase</h1>
+    <p class="subtitle">Unbeatable Minimax AI Tic-Tac-Toe</p>
+  </header>
+
+  <div class="container">
+    <div id="status" class="status-badge">Your Turn (X)</div>
+
+    <div class="grid" id="board">
+      <div class="cell" onclick="makeMove(0)"></div>
+      <div class="cell" onclick="makeMove(1)"></div>
+      <div class="cell" onclick="makeMove(2)"></div>
+      <div class="cell" onclick="makeMove(3)"></div>
+      <div class="cell" onclick="makeMove(4)"></div>
+      <div class="cell" onclick="makeMove(5)"></div>
+      <div class="cell" onclick="makeMove(6)"></div>
+      <div class="cell" onclick="makeMove(7)"></div>
+      <div class="cell" onclick="makeMove(8)"></div>
+    </div>
+
+    <button class="btn-reset" onclick="resetGame()">Restart Game</button>
+  </div>
+
+  <script>
+    let board = ["", "", "", "", "", "", "", "", ""];
+    let isGameOver = false;
+    const huPlayer = "X";
+    const aiPlayer = "O";
+
+    function makeMove(index) {
+      if (board[index] === "" && !isGameOver) {
+        board[index] = huPlayer;
+        render();
+        
+        if (checkWin(board, huPlayer)) {
+          document.getElementById("status").textContent = "🎉 You Win!";
+          isGameOver = true;
+          return;
+        }
+
+        if (!board.includes("")) {
+          document.getElementById("status").textContent = "🤝 It's a Draw!";
+          isGameOver = true;
+          return;
+        }
+
+        // AI Move
+        document.getElementById("status").textContent = "AI is thinking...";
+        setTimeout(() => {
+          let bestMove = minimax(board, aiPlayer).index;
+          board[bestMove] = aiPlayer;
+          render();
+
+          if (checkWin(board, aiPlayer)) {
+            document.getElementById("status").textContent = "🤖 AI Wins!";
+            isGameOver = true;
+          } else if (!board.includes("")) {
+            document.getElementById("status").textContent = "🤝 It's a Draw!";
+            isGameOver = true;
+          } else {
+            document.getElementById("status").textContent = "Your Turn (X)";
+          }
+        }, 200);
+      }
+    }
+
+    function render() {
+      const cells = document.querySelectorAll(".cell");
+      cells.forEach((cell, i) => {
+        cell.textContent = board[i];
+        cell.classList.remove("x", "o");
+        if (board[i] === "X") cell.classList.add("x");
+        if (board[i] === "O") cell.classList.add("o");
+      });
+    }
+
+    function resetGame() {
+      board = ["", "", "", "", "", "", "", "", ""];
+      isGameOver = false;
+      document.getElementById("status").textContent = "Your Turn (X)";
+      render();
+    }
+
+    function checkWin(b, player) {
+      const wins = [
+        [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+        [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+        [0, 4, 8], [2, 4, 6]             // Diagonals
+      ];
+      return wins.some(w => w.every(i => b[i] === player));
+    }
+
+    function minimax(newBoard, player) {
+      let availSpots = newBoard.map((val, idx) => val === "" ? idx : null).filter(val => val !== null);
+
+      if (checkWin(newBoard, huPlayer)) return { score: -10 };
+      if (checkWin(newBoard, aiPlayer)) return { score: 10 };
+      if (availSpots.length === 0) return { score: 0 };
+
+      let moves = [];
+      for (let i = 0; i < availSpots.length; i++) {
+        let move = {};
+        move.index = availSpots[i];
+        newBoard[availSpots[i]] = player;
+
+        if (player === aiPlayer) {
+          let result = minimax(newBoard, huPlayer);
+          move.score = result.score;
+        } else {
+          let result = minimax(newBoard, aiPlayer);
+          move.score = result.score;
+        }
+
+        newBoard[availSpots[i]] = "";
+        moves.push(move);
+      }
+
+      let bestMove;
+      if (player === aiPlayer) {
+        let bestScore = -10000;
+        for (let i = 0; i < moves.length; i++) {
+          if (moves[i].score > bestScore) {
+            bestScore = moves[i].score;
+            bestMove = i;
+          }
+        }
+      } else {
+        let bestScore = 10000;
+        for (let i = 0; i < moves.length; i++) {
+          if (moves[i].score < bestScore) {
+            bestScore = moves[i].score;
+            bestMove = i;
+          }
+        }
+      }
+      return moves[bestMove];
+    }
+  </script>
+</body>
+</html>
