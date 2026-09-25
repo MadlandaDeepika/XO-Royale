@@ -1,1 +1,1 @@
-# offline-voice-ai
+# xo-royale
